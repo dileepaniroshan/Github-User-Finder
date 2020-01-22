@@ -6,17 +6,14 @@ import User from './components/users/User';
 import Search from './components/users/Search';
 import Alert from './components/layout/Alert';
 import About from './components/pages/About';
-import axios from 'axios';
+
+import GithubState from './context/gituhub/GithubState';
 
 import './App.css';
 
 
 const App = () =>{
 
-  const [users, setUsers] = useState([]);
-  const [user, setUser] = useState({});
-  const [repos, setRepos] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [alert, setAlerts] = useState(null);
 
   // async componentDidMount() {
@@ -31,51 +28,10 @@ const App = () =>{
 
   // Search github users
 
-  const searchUsers = async (text) => {
-
-    setLoading(true);
-
-    const res = await axios.get(`https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
-
-    setUsers(res.data.items);
-    setLoading(false);
-
-  }
-
-  // Get single github user
-
-  const getUser = async (username) => {
-
-    setLoading(true);
-
-    const res = await axios.get(`https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
-
-    setUser(res.data);
-    setLoading(false);
-
-  }
 
   // get user repostiories 
 
-  const getUserRepos = async (username) => {
-
-    setLoading(true);
-
-    const res = await axios.get(`https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
-    //console.log(res.data.items);
-
-    setRepos(res.data);
-    setLoading(false);
-
-  }
-
-
-  // Clear users from state
-
-const clearUsers = () => {
-  setUsers([]);
-  setLoading(false);
-}
+  
 
 // set alert 
 
@@ -86,6 +42,7 @@ const setAlert = ( msg, type ) => {
 }
 
       return (
+      <GithubState>
       <Router>
       <div className="App">
         {/* <h1>Hello React</h1> */}
@@ -97,28 +54,17 @@ const setAlert = ( msg, type ) => {
         <Switch>
           <Route exact path ='/' render= { props => (
             <Fragment>
-                  <Search 
-                  searchUsers={searchUsers} 
-                  clearUsers={clearUsers} 
-                  showClear={users.length > 0 ? true : false }
+                  <Search  
                   setAlert = {setAlert}
                 />
 
-              <Users loading={loading} users={users}/>
+              <Users/>
             </Fragment>
           )}/>
 
         <Route exact path='/about' component={About} />
 
-        <Route exacr path='/user/:login' render={props =>(
-           <User {...props} 
-                 getUser={getUser}
-                 getUserRepos={getUserRepos}
-                 user={user}
-                 repos={repos}
-                 loading={loading}
-            />
-        )} />
+        <Route exacr path='/user/:login' component={User} />
 
         </Switch>
 
@@ -127,6 +73,7 @@ const setAlert = ( msg, type ) => {
         
       </div>
       </Router>
+      </GithubState>
     );
  
  
